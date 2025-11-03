@@ -126,7 +126,7 @@ def world_population_analysis_app():
     # 데이터 로드 (예: CSV 파일)
     # 여기서는 예시로 파일명이 'world_population_by_country.csv' 라고 가정
     # 파일은 컬럼: CountryCode, CountryName, Year1970, Year1980, ..., Year2022
-    df_pop = pd.read_csv("world_population_by_country.csv", dtype={"CountryCode": str})
+    df_pop = pd.read_csv("world_population.csv", dtype={"CountryCode": str})
     # 선택한 연도 컬럼 이름
     col_year = f"Year{year}"
     if col_year not in df_pop.columns:
