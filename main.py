@@ -6,44 +6,73 @@ def main():
     st.write("사칙연산, 모듈러, 지수, 로그 기능을 제공합니다.")
     st.write("---")
 
-    # 입력값
-    num1 = st.number_input("첫 번째 숫자", value=0.0)
-    num2 = st.number_input("두 번째 숫자", value=0.0)
-
-    operation = st.selectbox(
-        "연산 선택",
+    # 연산 종류 먼저 선택
+    연산 = st.selectbox(
+        "원하시는 연산을 선택하세요:",
         ("덧셈 (+)", "뺄셈 (-)", "곱셈 (×)", "나눗셈 (÷)", "모듈러 (a mod b)", "지수 (a^b)", "로그 (log_b a)")
     )
 
-    result = None
-    error = None
+    # 연산 종류에 따라 입력 필드 및 설명 변경
+    if 연산 == "덧셈 (+)":
+        st.write("두 숫자를 입력하세요. 결과는 첫 번째 숫자 + 두 번째 숫자 입니다.")
+        a = st.number_input("첫 번째 숫자", value=0.0, key="add_a")
+        b = st.number_input("두 번째 숫자", value=0.0, key="add_b")
+    elif 연산 == "뺄셈 (-)":
+        st.write("두 숫자를 입력하세요. 결과는 첫 번째 숫자 − 두 번째 숫자 입니다.")
+        a = st.number_input("첫 번째 숫자", value=0.0, key="sub_a")
+        b = st.number_input("두 번째 숫자", value=0.0, key="sub_b")
+    elif 연산 == "곱셈 (×)":
+        st.write("두 숫자를 입력하세요. 결과는 첫 번째 숫자 × 두 번째 숫자 입니다.")
+        a = st.number_input("첫 번째 숫자", value=0.0, key="mul_a")
+        b = st.number_input("두 번째 숫자", value=0.0, key="mul_b")
+    elif 연산 == "나눗셈 (÷)":
+        st.write("두 숫자를 입력하세요. 결과는 첫 번째 숫자 ÷ 두 번째 숫자 입니다. 두 번째 숫자는 0이 될 수 없습니다.")
+        a = st.number_input("첫 번째 숫자", value=0.0, key="div_a")
+        b = st.number_input("두 번째 숫자 (0이 아닙니다)", value=1.0, key="div_b")
+    elif 연산 == "모듈러 (a mod b)":
+        st.write("두 정수를 입력하세요. 결과는 첫 번째 정수 mod 두 번째 정수 입니다. 두 번째 정수는 0이 될 수 없습니다.")
+        a = st.number_input("첫 번째 정수", value=0, step=1, format="%d", key="mod_a")
+        b = st.number_input("두 번째 정수 (0이 아닙니다)", value=1, step=1, format="%d", key="mod_b")
+    elif 연산 == "지수 (a^b)":
+        st.write("두 숫자를 입력하세요. 결과는 첫 번째 숫자 ^ 두 번째 숫자 (첫 번째 숫자의 두 번째 숫자만큼 거듭제곱) 입니다.")
+        a = st.number_input("밑 (a)", value=0.0, key="exp_a")
+        b = st.number_input("지수 (b)", value=1.0, key="exp_b")
+    elif 연산 == "로그 (log_b a)":
+        st.write("두 숫자를 입력하세요. 결과는 밑(b)을 기준으로 한 로그 값입니다. a>0, b>0 그리고 b≠1 이어야 합니다.")
+        a = st.number_input("로그할 숫자 (a, a>0)", value=1.0, key="log_a")
+        b = st.number_input("밑 (b, b>0 그리고 b≠1)", value=10.0, key="log_b")
+    else:
+        st.error("알 수 없는 연산입니다.")
+        return
 
+    # 연산 실행 및 결과 뿌리기
+    error = None
+    result = None
     try:
-        if operation == "덧셈 (+)":
-            result = num1 + num2
-        elif operation == "뺄셈 (-)":
-            result = num1 - num2
-        elif operation == "곱셈 (×)":
-            result = num1 * num2
-        elif operation == "나눗셈 (÷)":
-            if num2 == 0:
+        if 연산 == "덧셈 (+)":
+            result = a + b
+        elif 연산 == "뺄셈 (-)":
+            result = a - b
+        elif 연산 == "곱셈 (×)":
+            result = a * b
+        elif 연산 == "나눗셈 (÷)":
+            if b == 0:
                 error = "오류: 두 번째 숫자가 0이면 나눗셈을 할 수 없습니다."
             else:
-                result = num1 / num2
-        elif operation == "모듈러 (a mod b)":
-            if num2 == 0:
-                error = "오류: 두 번째 숫자가 0이면 모듈로 연산을 할 수 없습니다."
+                result = a / b
+        elif 연산 == "모듈러 (a mod b)":
+            if b == 0:
+                error = "오류: 두 번째 정수가 0이면 모듈러 연산을 할 수 없습니다."
             else:
-                # 모듈러는 정수로 계산하는 것이 일반적이므로 int 변환
-                result = int(num1) % int(num2)
-        elif operation == "지수 (a^b)":
-            result = num1 ** num2
-        elif operation == "로그 (log_b a)":
-            # 로그 밑과 숫자 모두 양수여야 함
-            if num1 <= 0 or num2 <= 0 or num2 == 1:
-                error = ("오류: 로그 계산 시에는 a>0, b>0 그리고 b≠1 이어야 합니다.")
+                # 정수로 변환하여 계산
+                result = int(a) % int(b)
+        elif 연산 == "지수 (a^b)":
+            result = a ** b
+        elif 연산 == "로그 (log_b a)":
+            if a <= 0 or b <= 0 or b == 1:
+                error = "오류: 로그 계산 시에는 a>0, b>0 그리고 b≠1 이어야 합니다."
             else:
-                result = math.log(num1, num2)
+                result = math.log(a, b)
         else:
             error = "알 수 없는 연산입니다."
     except Exception as e:
