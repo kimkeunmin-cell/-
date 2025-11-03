@@ -2,6 +2,7 @@
 import streamlit as st
 import math
 import numpy as np
+import pandas as pd
 import plotly.express as px
 
 def calculator_app():
@@ -83,6 +84,7 @@ def calculator_app():
     else:
         st.success(f"결과: {result}")
 
+
 def probability_simulator_app():
     st.header("🎲 확률 시뮬레이터")
     st.write("동전 또는 주사위를 선택하고, 시행 횟수를 입력하면 결과를 그래프로 확인할 수 있습니다.")
@@ -91,20 +93,18 @@ def probability_simulator_app():
     trials = st.number_input("시행 횟수", min_value=1, value=100, step=1, key="sim_trials")
 
     if realisation_type == "동전 던지기":
-        # 동전 2면: 앞면/뒷면
         results = np.random.choice(["앞면", "뒷면"], size=trials)
         counts = {face: int((results == face).sum()) for face in ["앞면", "뒷면"]}
-        df = {"결과": list(counts.keys()), "횟수": list(counts.values())}
+        df = pd.DataFrame({"결과": list(counts.keys()), "횟수": list(counts.values())})
         fig = px.bar(df, x="결과", y="횟수", title="동전 던지기 결과", text="횟수")
         st.plotly_chart(fig, use_container_width=True)
         st.write(f"총 시행 횟수: {trials}")
         st.write(f"앞면: {counts['앞면']}회, 뒷면: {counts['뒷면']}회")
 
     elif realisation_type == "주사위 굴리기":
-        # 주사위 6면
         results = np.random.choice([1,2,3,4,5,6], size=trials)
         unique, counts_arr = np.unique(results, return_counts=True)
-        df = {"눈": unique.tolist(), "횟수": counts_arr.tolist()}
+        df = pd.DataFrame({"눈": unique.tolist(), "횟수": counts_arr.tolist()})
         fig = px.bar(df, x="눈", y="횟수", title="주사위 굴리기 결과", text="횟수")
         fig.update_layout(xaxis_title="주사위 눈", yaxis_title="횟수")
         st.plotly_chart(fig, use_container_width=True)
@@ -115,14 +115,57 @@ def probability_simulator_app():
     else:
         st.error("알 수 없는 시뮬레이션 유형입니다.")
 
+
+def world_population_analysis_app():
+    st.header("🌍 연도별 세계인구 분석")
+    st.write("연도별로 세계 각국의 인구를 지도 상에서 색으로 표현합니다.")
+
+    # 연도 선택
+    year = st.selectbox("연도를 선택하세요:", ("1970", "1980", "1990", "2000", "2010", "2015", "2020", "2022"))
+
+    # 데이터 로드 (예: CSV 파일)
+    # 여기서는 예시로 파일명이 'world_population_by_country.csv' 라고 가정
+    # 파일은 컬럼: CountryCode, CountryName, Year1970, Year1980, ..., Year2022
+    df_pop = pd.read_csv("world_population_by_country.csv", dtype={"CountryCode": str})
+    # 선택한 연도 컬럼 이름
+    col_year = f"Year{year}"
+    if col_year not in df_pop.columns:
+        st.error(f"데이터에 '{col_year}' 컬럼이 없습니다.")
+        return
+
+    # 지도 시각화를 위해 ISO-3 코드 이용
+    fig = px.choropleth(
+        df_pop,
+        locations="CountryCode",
+        color=col_year,
+        hover_name="CountryName",
+        color_continuous_scale="Viridis",
+        title=f"{year}년 세계 인구 분포 (국가별)",
+        labels={col_year: "인구수"}
+    )
+    fig.update_layout(
+        geo=dict(showframe=False, showcoastlines=False),
+        margin={"r":0,"t":50,"l":0,"b":0}
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.write(f"선택한 연도: {year}년")
+    st.write("색이 진할수록 해당 국가의 인구가 많음을 의미합니다.")
+
+
 def main():
     st.sidebar.title("메뉴")
-    app_mode = st.sidebar.selectbox("앱을 선택하세요:", ("계산기", "확률 시뮬레이터"))
+    app_mode = st.sidebar.selectbox(
+        "앱을 선택하세요:",
+        ("계산기", "확률 시뮬레이터", "연도별 세계인구 분석")
+    )
 
     if app_mode == "계산기":
         calculator_app()
     elif app_mode == "확률 시뮬레이터":
         probability_simulator_app()
+    elif app_mode == "연도별 세계인구 분석":
+        world_population_analysis_app()
     else:
         st.sidebar.error("알 수 없는 모드입니다.")
 
